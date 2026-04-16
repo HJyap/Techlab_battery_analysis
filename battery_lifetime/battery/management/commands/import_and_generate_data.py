@@ -89,17 +89,19 @@ class Command(BaseCommand):
         return Path(__file__).resolve().parent.parent / "data"
 
     def load_dataframe(self, data_dir: Path) -> pd.DataFrame:
-        master_path = data_dir / "master_table.csv"
-        cycle_path = data_dir / "cycle_metrics.csv"
-        ica_path = data_dir / "ica_features.csv"
+#        master_path = data_dir / "master_table.csv"
+#        cycle_path = data_dir / "cycle_metrics.csv"
+#        ica_path = data_dir / "ica_features.csv"
 
-        if master_path.exists():
-            return pd.read_csv(master_path)
-
-        if cycle_path.exists() and ica_path.exists():
-            cycle_df = pd.read_csv(cycle_path)
-            ica_df = pd.read_csv(ica_path)
-            return cycle_df.merge(ica_df, on=["cell", "cyc"], how="inner")
+ #       if master_path.exists():
+  #          return pd.read_csv(master_path)
+#
+ #       if cycle_path.exists() and ica_path.exists():
+  #          cycle_df = pd.read_csv(cycle_path)
+   ##        return cycle_df.merge(ica_df, on=["cell", "cyc"], how="inner")
+        clean_path = data_dir / "cleaned_battery_data.csv"
+        if clean_path.exists():
+            return pd.read_csv(clean_path)
 
         raise FileNotFoundError(
             "Expected master_table.csv or both cycle_metrics.csv and ica_features.csv"
