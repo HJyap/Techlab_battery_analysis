@@ -1,0 +1,11 @@
+Django>=4.2
+djangorestframework
+pandas
+numpy
+scikit-learn
+matplotlib
+joblib
+kagglehub
+psycopg2-binary
+plotly
+kagglehub[pandas-datasets]

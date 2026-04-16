@@ -1,0 +1,147 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>BatteryLifetime - Home</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Favicon für all Geräte -->
+    <link rel="icon" type="image/png" href="{% static 'images/battery-icon-blueand-black-opradbi0xtooavzf.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/battery-icon-blueand-black-opradbi0xtooavzf.png' %}">
+    <link rel="apple-touch-icon" type="image/png" href="{% static 'images/battery-icon-blueand-black-opradbi0xtooavzf.png' %}">
+    
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+    <!-- Navbar mit  dem Logo -->
+    <nav class="bg-gray-800 shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <a href="/" class="flex items-center space-x-3">
+                <img src="{% static 'images/battery-icon-blueand-black-opradbi0xtooavzf.png' %}" 
+                     alt="BatteryLifetime Logo" 
+                     class="h-8 w-8">
+                <h1 class="text-xl font-bold text-white">BatteryLifetime</h1>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Sections  -->
+    <div class="gradient-bg text-white">
+        <div class="container mx-auto px-6 py-16">
+            <div class="text-center">
+                <h1 class="text-5xl font-bold mb-4">BatteryLifetime</h1>
+                <p class="text-xl mb-8 text-blue-200">Intelligente Batterieanalyse und Performance-Monitoring</p>
+                <a href="/dashboard" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                    Go to dashboard <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="container mx-auto px-6 py-16">
+        <h2 class="text-3xl font-bold text-center text-white mb-12">Our features</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-gray-800 rounded-xl shadow-lg p-6 card-hover">
+                <div class="text-center mb-4">
+                    <i class="fas fa-chart-bar text-4xl text-blue-500 mb-3"></i>
+                    <h3 class="text-xl font-semibold text-white">Performance analysis</h3>
+                </div>
+                <p class="text-gray-300 text-center">
+                    Detailed analysis of battery performance under various conditions
+                </p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="bg-gray-800 rounded-xl shadow-lg p-6 card-hover">
+                <div class="text-center mb-4">
+                    <i class="fas fa-thermometer-half text-4xl text-red-500 mb-3"></i>
+                    <h3 class="text-xl font-semibold text-white">Temperature monitoring</h3>
+                </div>
+                <p class="text-gray-300 text-center">
+                    Analysis of battery performance in different temperature ranges
+                </p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="bg-gray-800 rounded-xl shadow-lg p-6 card-hover">
+                <div class="text-center mb-4">
+                    <i class="fas fa-bolt text-4xl text-yellow-500 mb-3"></i>
+                    <h3 class="text-xl font-semibold text-white">Capacity tracking</h3>
+                </div>
+                <p class="text-gray-300 text-center">
+                    Monitoring battery capacity and identifying the best battery types
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="bg-gray-800 py-16">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <div class="text-3xl font-bold text-blue-500">50+</div>
+                    <div class="text-gray-300">Analyzed batteries</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-green-500">1k+</div>
+                    <div class="text-gray-300">Data points</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-purple-500">24/7</div>
+                    <div class="text-gray-300">Monitoring</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-red-500">99%</div>
+                    <div class="text-gray-300">accuracy</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="bg-gray-900 py-16">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold text-white mb-4">Ready for detailed insights?</h2>
+            <p class="text-gray-300 mb-8 max-w-2xl mx-auto">
+                Start analyzing your battery data now and discover optimization potential.
+            </p>
+            <div class="space-x-4">
+                <a href="/dashboard" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                    Explore the dashboard
+                </a>
+                <a href="#" class="border border-gray-600 text-gray-300 px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition duration-300">
+                    Learn more
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-300">&copy; 2025 BatteryLifetime. All rights reserved.</p>
+            <div class="mt-4 space-x-4">
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

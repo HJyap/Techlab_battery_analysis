@@ -1,0 +1,313 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <title>BatteryLifetime - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="icon" type="image/png" href="{% static 'images/battery-icon-blueand-black-opradbi0xtooavzf.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/battery-icon-blueand-black-opradbi0xtooavzf.png' %}">
+    <link rel="apple-touch-icon" type="image/png" href="{% static 'images/battery-icon-blueand-black-opradbi0xtooavzf.png' %}">
+
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
+        }
+        .plotly-chart {
+            width: 100%;
+            height: 100%;
+        }
+        .plotly-chart > div {
+            width: 100% !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+    <nav class="bg-gray-800 shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <a href="/" class="flex items-center space-x-3">
+                <img src="{% static 'images/battery-icon-blueand-black-opradbi0xtooavzf.png' %}"
+                     alt="BatteryLifetime Logo"
+                     class="h-8 w-8">
+                <h1 class="text-xl font-bold text-white">BatteryLifetime</h1>
+            </a>
+        </div>
+    </nav>
+
+    <div class="gradient-bg text-white">
+        <div class="container mx-auto px-6 py-12">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold mb-4">Battery Performance Dashboard</h1>
+                <p class="text-xl text-blue-200">Analysis of cycle-based battery data</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-6 py-8">
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6 mb-8 card-hover">
+            <h2 class="text-xl font-semibold text-white mb-4 flex items-center">
+                <i class="fas fa-sliders-h mr-2 text-blue-400"></i> Filter settings
+            </h2>
+
+            <form method="get" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4">
+                <div class="flex flex-col">
+                    <label class="text-gray-300 font-medium mb-2">Battery</label>
+                    <select name="battery" class="bg-gray-700 border border-gray-600 text-white rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                        <option value="all" {% if selected_battery == "all" %}selected{% endif %}>All batteries</option>
+                        {% for b in battery_options %}
+                            <option value="{{ b }}" {% if selected_battery == b %}selected{% endif %}>Battery {{ b }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-gray-300 font-medium mb-2">Ranking mode</label>
+                    <select name="score_mode" class="bg-gray-700 border border-gray-600 text-white rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                        <option value="last_capacity" {% if score_mode == "last_capacity" %}selected{% endif %}>Last Capacity</option>
+                        <option value="mean_capacity" {% if score_mode == "mean_capacity" %}selected{% endif %}>Mean Capacity</option>
+                        <option value="retention_pct" {% if score_mode == "retention_pct" %}selected{% endif %}>Retention %</option>
+                        <option value="deg_rate" {% if score_mode == "deg_rate" %}selected{% endif %}>Degradation Rate</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-gray-300 font-medium mb-2">Cycle from</label>
+                    <input type="number" name="cycle_min" value="{{ cycle_min }}"
+                           class="bg-gray-700 border border-gray-600 text-white rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-gray-300 font-medium mb-2">Cycle to</label>
+                    <input type="number" name="cycle_max" value="{{ cycle_max }}"
+                           class="bg-gray-700 border border-gray-600 text-white rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-gray-300 font-medium mb-2">Temp min (°C)</label>
+                    <input type="number" step="0.01" name="temp_min" value="{{ temp_min }}"
+                           class="bg-gray-700 border border-gray-600 text-white rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-gray-300 font-medium mb-2">Temp max (°C)</label>
+                    <input type="number" step="0.01" name="temp_max" value="{{ temp_max }}"
+                           class="bg-gray-700 border border-gray-600 text-white rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="xl:col-span-6">
+                    <button class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 flex items-center justify-center">
+                        <i class="fas fa-filter mr-2"></i> Apply filters
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {% if best_battery %}
+        <div class="stat-card text-white rounded-xl shadow-lg p-6 mb-8 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-semibold mb-2 flex items-center">
+                        <i class="fas fa-trophy mr-3"></i> Best battery under current conditions
+                    </h2>
+                    <p class="text-lg">
+                        <span class="font-bold">Battery {{ best_battery }}</span>
+                        is <span class="text-yellow-400 font-bold">Rank #1</span> 
+                        with a {{ score_label }} of 
+                        <span class="font-bold">{{ best_score }} {{ score_unit }}</span>
+                    </p>
+                    <p class="text-sm text-blue-100 mt-2">{{ score_description }}</p>
+                </div>
+                <div class="text-4xl opacity-80">
+                    <i class="fas fa-crown"></i>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gray-800 rounded-xl shadow-lg p-6 card-hover text-center">
+                <div class="text-3xl text-blue-500 mb-2">
+                    <i class="fas fa-battery-full"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white">Filtered batteries</h3>
+                <p class="text-2xl font-bold text-white">{{ total_batteries }}</p>
+            </div>
+
+            <div class="bg-gray-800 rounded-xl shadow-lg p-6 card-hover text-center">
+                <div class="text-3xl text-green-500 mb-2">
+                    <i class="fas fa-rotate"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white">Cycle range</h3>
+                <p class="text-2xl font-bold text-white">{{ cycle_min }} - {{ cycle_max }}</p>
+            </div>
+
+            <div class="bg-gray-800 rounded-xl shadow-lg p-6 card-hover text-center">
+                <div class="text-3xl text-purple-500 mb-2">
+                    <i class="fas fa-temperature-half"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white">Temperature range</h3>
+                <p class="text-2xl font-bold text-white">{{ temp_min }} - {{ temp_max }} °C</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-gray-800 rounded-xl shadow-lg p-6 card-hover">
+                <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+                    <i class="fas fa-chart-bar mr-2 text-blue-500"></i> Battery ranking
+                </h3>
+                <div class="h-94 bg-gray-900 rounded-lg overflow-hidden">
+                    <div class="plotly-chart">
+                        {{ graph_bar|safe }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 rounded-xl shadow-lg p-6 card-hover">
+                <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+                    <i class="fas fa-chart-line mr-2 text-green-500"></i> Capacity degradation over cycle
+                </h3>
+                <div class="h-94 bg-gray-900 rounded-lg overflow-hidden">
+                    <div class="plotly-chart">
+                        {{ graph_line|safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if graph_deg %}
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6 card-hover mb-8">
+            <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+                <i class="fas fa-arrow-trend-down mr-2 text-yellow-500"></i> Degradation Rate
+            </h3>
+            <div class="h-94 bg-gray-900 rounded-lg overflow-hidden">
+                <div class="plotly-chart">
+                    {{ graph_deg|safe }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+
+        {% if graph_heatmap %}
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6 card-hover mb-8">
+            <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+                <i class="fas fa-th mr-2 text-red-500"></i> Capacity heatmap
+            </h3>
+            <div class="h-98 bg-gray-900 rounded-lg overflow-hidden">
+                <div class="plotly-chart">
+                    {{ graph_heatmap|safe }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if summary_rows %}
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6 card-hover mb-8">
+            <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+                <i class="fas fa-table mr-2 text-cyan-400"></i> Battery summary
+            </h3>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-left text-gray-300">
+                    <thead class="bg-gray-700 text-white">
+                        <tr>
+                            <th class="px-4 py-3">Battery</th>
+                            <th class="px-4 py-3">Cycle min</th>
+                            <th class="px-4 py-3">Cycle max</th>
+                            <th class="px-4 py-3">First capacity</th>
+                            <th class="px-4 py-3">Last capacity</th>
+                            <th class="px-4 py-3">Mean capacity</th>
+                            <th class="px-4 py-3">Retention %</th>
+                            <th class="px-4 py-3">Mean temp</th>
+                            <th class="px-4 py-3">Deg. Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in summary_rows %}
+                        <tr class="border-b border-gray-700 hover:bg-gray-700/50">
+                            <td class="px-4 py-3 font-semibold text-white">{{ row.battery_id }}</td>
+                            <td class="px-4 py-3">{{ row.cycle_min }}</td>
+                            <td class="px-4 py-3">{{ row.cycle_max }}</td>
+                            <td class="px-4 py-3">{{ row.capacity_first }}</td>
+                            <td class="px-4 py-3">{{ row.capacity_last }}</td>
+                            <td class="px-4 py-3">{{ row.capacity_mean }}</td>
+                            <td class="px-4 py-3">{{ row.retention_pct }}</td>
+                            <td class="px-4 py-3">{{ row.temperature_mean }}</td>
+                            <td class="px-4 py-3">{{ row.deg_rate }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6 card-hover">
+            <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+                <i class="fas fa-info-circle mr-2 text-blue-400"></i> Analysis notes
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-layer-group text-blue-400 mt-1"></i>
+                    <div>
+                        <h4 class="font-semibold text-white">Filter logic</h4>
+                        <p class="text-gray-300 text-sm">
+                            The dashboard filters batteries by cycle range and temperature range, which fits the current cycle-based dataset.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-lightbulb text-yellow-400 mt-1"></i>
+                    <div>
+                        <h4 class="font-semibold text-white">Recommendation</h4>
+                        <p class="text-gray-300 text-sm">
+                            Use "Last Capacity" for long-term comparison and "Retention %" to compare ageing stability fairly. Use "Degradation Rate" to see the average capacity loss per cycle.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="mt-6 p-4 bg-red-900 border border-red-700 rounded-lg">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle text-red-400 mr-3"></i>
+                <p class="text-red-200">{{ error }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-6 text-center">
+            <div class="flex justify-center items-center mb-4">
+                <img src="{% static 'images/battery-icon-blueand-black-opradbi0xtooavzf.png' %}"
+                     alt="BatteryLifetime Logo"
+                     class="h-6 w-6 mr-2">
+                <span class="text-lg font-bold">BatteryLifetime</span>
+            </div>
+            <p class="text-gray-300">&copy; 2025 BatteryLifetime. All rights reserved.</p>
+            <div class="mt-4 space-x-4">
+                <a href="/" class="text-gray-400 hover:text-white transition duration-300">
+                    <i class="fas fa-home mr-1"></i> Zur Startseite
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                    <i class="fas fa-download mr-1"></i> Export (muss gemacht werden)
+                </a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
